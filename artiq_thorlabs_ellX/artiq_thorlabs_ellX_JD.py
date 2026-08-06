@@ -44,31 +44,32 @@ class ThorlabsELLXJD(ThorlabsELLXInterface):
         self.baudrate = baudrate
         self.timeout = timeout
         self.dev_addr = addr
-        self.serial: Optional[serial.Serial] = None
+        self.serial = serial.Serial(baudrate=self.baudrate, timeout=self.timeout)
+        self.serial.port = self.device
         self.device_type = None
-        self.connect()
+        # self.connect()
 
     def log(self, msg: str) -> None:
         print(f"[{self.__class__.__name__}] {msg}")
     
-    def connect(self) -> COM_STATUS:
-        """Open serial connection to the controller."""
-        try:
-            self.serial = serial.Serial(
-                port=self.device,
-                baudrate=self.baudrate,
-                timeout=self.timeout
-            )
-            self.log(f"Connected to {self.device}")
-        except serial.SerialException:
-            self.log(f"Failed to connect to {self.device}")
-            return COM_STATUS.SERIAL_ERROR
-        return COM_STATUS.COM_OK
+    # def connect(self) -> COM_STATUS:
+    #     """Open serial connection to the controller."""
+    #     try:
+    #         self.serial = serial.Serial(
+    #             port=self.device,
+    #             baudrate=self.baudrate,
+    #             timeout=self.timeout
+    #         )
+    #         self.log(f"Connected to {self.device}")
+    #     except serial.SerialException:
+    #         self.log(f"Failed to connect to {self.device}")
+    #         return COM_STATUS.SERIAL_ERROR
+    #     return COM_STATUS.COM_OK
     
-    def close(self) -> None:
-        """Close serial connection."""
-        if self.serial and self.serial.is_open:
-            self.serial.close()
+    # def close(self) -> None:
+    #     """Close serial connection."""
+    #     if self.serial and self.serial.is_open:
+    #         self.serial.close()
     
     def _parse_resp_status(self, resp: str) -> COM_STATUS:
         if "ADDR_ERROR" in resp:
@@ -98,19 +99,20 @@ class ThorlabsELLXJD(ThorlabsELLXInterface):
     def _send_cmd(self, cmd: str) -> COM_RESULT_T:
         self.log(f"Sending: {cmd}")
         try:
-            self.serial.write(cmd.encode("ascii", errors="ignore"))
-            echo = self.serial.readline()
-            data = self.serial.readline().decode("ascii", errors="ignore").strip()
-            self.log(f"Read: {data}")
-            com_status = self._parse_resp_status(data)
-            if com_status == COM_STATUS.ABNORMAL_STATUS_VAL:
-                cmd_status = self._parse_resp_cmd_status(data)
-                return COM_RESULT_T(com_status, cmd_status, "")
-            if com_status != COM_STATUS.COM_OK:
-                return COM_RESULT_T(com_status, DEVICE_STATUS.OK, "")
+            with self.serial as s:
+                s.write(cmd.encode("ascii", errors="ignore"))
+                s.readline() # Read echo
+                data = s.readline().decode("ascii", errors="ignore").strip()
         except Exception as e:
             self.log(f"Serial port error: {e}")
             return COM_RESULT_T(COM_STATUS.SERIAL_ERROR, DEVICE_STATUS.OK, "")
+        self.log(f"Read: {data}")
+        com_status = self._parse_resp_status(data)
+        if com_status == COM_STATUS.ABNORMAL_STATUS_VAL:
+            cmd_status = self._parse_resp_cmd_status(data)
+            return COM_RESULT_T(com_status, cmd_status, "")
+        if com_status != COM_STATUS.COM_OK:
+            return COM_RESULT_T(com_status, DEVICE_STATUS.OK, "")
         return COM_RESULT_T(COM_STATUS.COM_OK, DEVICE_STATUS.OK, data)
     
     # ======================

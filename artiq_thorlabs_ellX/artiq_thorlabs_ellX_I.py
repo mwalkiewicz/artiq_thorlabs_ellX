@@ -190,7 +190,7 @@ class ThorlabsELLXInterface(abc.ABC):
         '''
 
     @abc.abstractmethod
-    async def get_status(self) -> Union[str, int]:
+    async def get_status(self) -> Union[int, int]:
         '''Read the device status
         
         Returns:
