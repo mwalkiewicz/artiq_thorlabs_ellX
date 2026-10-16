@@ -32,3 +32,25 @@ class ThorlabsELLXSim(ThorlabsELLX, ThorlabsELLXInterface):
         result = self._responses_queue.pop(0)
         self.log(f"Simulate read response: {result}")
         return result
+
+    # missing in implementation, remove once available
+    async def set_home_offset(self, val: int) -> str:
+        raise NotImplementedError()
+
+    async def get_jog_step(self) -> tuple[int, Union[float, int]]:
+        raise NotImplementedError()
+
+    async def get_velocity(self) -> tuple[int, int]:
+        raise NotImplementedError()
+
+    async def get_zero_position(self) -> tuple[int, Union[float, int]]:
+        raise NotImplementedError()
+
+    async def home(self, dir: int) -> tuple[int, Union[float, int]]:
+        raise NotImplementedError()
+
+    async def move_absolute(self, val: float) -> tuple[int, Union[float, int]]:
+        raise NotImplementedError()
+
+    async def move_relative(self, val: float) -> tuple[int, Union[float, int]]:
+        raise NotImplementedError()
