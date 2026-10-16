@@ -10,8 +10,8 @@ from artiq_thorlabs_ellX.artiq_thorlabs_ellX import (
 
 
 class ThorlabsELLXSim(ThorlabsELLX, ThorlabsELLXInterface):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self,):
+        super().__init__(device=None)
         self._responses_queue = []
 
     def _generate_response(self, cmd: COMMAND_WORDS):
