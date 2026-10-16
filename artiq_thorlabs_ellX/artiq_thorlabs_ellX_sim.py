@@ -34,7 +34,7 @@ class ThorlabsELLXSim(ThorlabsELLX, ThorlabsELLXInterface):
         return result
 
     # missing in implementation, remove once available
-    async def set_home_offset(self, val: int) -> str:
+    async def get_home_offset(self) -> tuple[int, Union[float, int]]:
         raise NotImplementedError()
 
     async def get_jog_step(self) -> tuple[int, Union[float, int]]:
